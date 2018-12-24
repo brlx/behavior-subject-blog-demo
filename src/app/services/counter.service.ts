@@ -1,35 +1,41 @@
 import { Injectable } from '@angular/core';
+
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
+import { scan } from 'rxjs/operators/scan';
+import { shareReplay } from 'rxjs/operators/shareReplay';
 
-interface Count {
-  value: number;
+const INITIAL_VALUE = 0;
+const INCREMENT = 1;
+
+interface CounterEvent {
+  increment?: number;
+  reset?: boolean;
 }
 
 @Injectable()
 export class CounterService {
 
-  constructor() { }
+  private counterEvents = new BehaviorSubject<CounterEvent>({ reset: true });
+  public counterValue: Observable<number> = this.counterEvents.asObservable().pipe(
+    scan((acc: number, event: CounterEvent): number => {
+      return event.reset 
+        ? INITIAL_VALUE
+        : (acc || INITIAL_VALUE) + event.increment;
+    }, INITIAL_VALUE),
+    shareReplay(),
+  );
 
-  private initialCount: Count = {value: 0};
-  private countTracker = new BehaviorSubject<Count>(this.initialCount);
-
-  /** Allows subscription to the behavior subject as an observable */
-  getCount(): Observable<Count> {
-    return this.countTracker.asObservable();
+  increment(): void {
+    this.counterEvents.next({ increment: INCREMENT });
   }
 
-  /**
-   * Allows updating the current value of the behavior subject
-   * @param val a number representing the current value
-   * @param delta a number representing the positive or negative change in current value
-   */
-  setCount(val: number, delta: number): void {
-    this.countTracker.next({value: (val + delta)});
+  decrement(): void {
+    this.counterEvents.next({ increment: INCREMENT * -1 });
   }
 
   /** Resets the count to the initial value */
   resetCount(): void {
-    this.countTracker.next(this.initialCount);
+    this.counterEvents.next({ reset: true });
   }
 }
