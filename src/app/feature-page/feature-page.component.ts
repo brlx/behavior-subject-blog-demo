@@ -9,8 +9,4 @@ import { CounterService } from '../services/counter.service';
     CounterService
   ],
 })
-export class FeaturePageComponent {
-
-  constructor() { }
-
-}
+export class FeaturePageComponent {}
