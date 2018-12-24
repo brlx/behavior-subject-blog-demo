@@ -5,20 +5,18 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { CounterComponent } from './counter/counter.component';
 import { OutputComponent } from './output/output.component';
-import { CounterService } from './services/counter.service';
+import { FeaturePageComponent } from './feature-page/feature-page.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
+    FeaturePageComponent,
     CounterComponent,
-    OutputComponent
+    OutputComponent,
   ],
   imports: [
     BrowserModule
-  ],
-  providers: [
-    CounterService
   ],
   bootstrap: [AppComponent]
 })
