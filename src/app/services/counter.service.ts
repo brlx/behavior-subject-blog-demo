@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional } from '@angular/core';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
@@ -13,25 +13,41 @@ interface CounterEvent {
   reset?: boolean;
 }
 
+export class CounterConfig {
+  increment?: number;
+  initialValue?: number;
+}
+
 @Injectable()
 export class CounterService {
+
+  private incrementValue: number;
+  private initialValue: number;
+
+  constructor(
+    @Optional() maybeConfig: CounterConfig,
+  ) {
+    const config: CounterConfig = maybeConfig || {};
+    this.incrementValue = config.increment || INCREMENT;
+    this.initialValue = config.initialValue || INITIAL_VALUE;
+  }
 
   private counterEvents = new BehaviorSubject<CounterEvent>({ reset: true });
   public counterValue: Observable<number> = this.counterEvents.asObservable().pipe(
     scan((acc: number, event: CounterEvent): number => {
       return event.reset 
-        ? INITIAL_VALUE
-        : (acc || INITIAL_VALUE) + event.increment;
-    }, INITIAL_VALUE),
+        ? this.initialValue
+        : (acc || this.initialValue) + event.increment;
+    }, this.initialValue),
     shareReplay(),
   );
 
   increment(): void {
-    this.counterEvents.next({ increment: INCREMENT });
+    this.counterEvents.next({ increment: this.incrementValue });
   }
 
   decrement(): void {
-    this.counterEvents.next({ increment: INCREMENT * -1 });
+    this.counterEvents.next({ increment: this.incrementValue * -1 });
   }
 
   /** Resets the count to the initial value */
